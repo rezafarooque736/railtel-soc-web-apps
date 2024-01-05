@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { namesWithId } from "./data";
+import { compareTimes, subtractTimes } from "@/utils";
+import { createAndInsertAttendanceTable } from "@/lib/mysqldb";
 
 export async function POST(req) {
   const formData = await req.formData();
@@ -11,75 +13,64 @@ export async function POST(req) {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   const datFileString = buffer.toString("utf-8");
+
   // Split the data by newline character to get an array of lines
   const datFileArray = datFileString.split("\r\n");
 
   // Remove any empty lines
   const filteredLines = datFileArray.filter((line) => line.trim() !== "");
 
-  const generateDates = (year, month, days) => {
-    const dates = [];
-    for (let i = 1; i <= days; i++) {
-      const day = i < 10 ? `0${i}` : `${i}`;
-      const date = `${year}-${month}-${day}`;
-      dates.push({ date, IN: "", OUT: "" });
-    }
-    return dates;
-  };
+  const result = [];
 
-  const resultArray = filteredLines.reduce((acc, line) => {
-    const [id, dateTime] = line.split("\t").map((field) => field.trim());
+  // Helper function to calculate the difference in hours and minutes
+  function calculateTimeDifference(start, end) {
+    const startTime = new Date(`1970-01-01 ${start}`);
+    const endTime = new Date(`1970-01-01 ${end}`);
+    const diff = endTime - startTime;
 
-    const [date, time] = dateTime.split(" ");
-    const [year, month] = date.split("-");
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
 
-    if (!acc[id]) {
-      acc[id] = {};
-    }
-
-    if (!acc[id][month]) {
-      const daysInMonth = new Date(year, month, 0).getDate();
-      acc[id][month] = generateDates(year, month, daysInMonth);
-    }
-
-    const day = parseInt(date.split("-")[2]);
-    const entry = acc[id][month][day - 1];
-    if (entry) {
-      if (!entry.IN) {
-        entry.IN = time;
-      } else {
-        entry.OUT = time;
-      }
-    }
-
-    return acc;
-  }, {});
-
-  const result = Object.entries(resultArray).map(([id, months]) => {
-    const entry = { id, name: namesWithId[id] || "Unknown" };
-
-    months["12"].forEach(({ date, IN, OUT }) => {
-      if (isWeekend(date)) {
-        entry[`${date} IN`] = "Week off";
-        entry[`${date} OUT`] = "Week off";
-      } else {
-        entry[`${date} IN`] = IN || "";
-        entry[`${date} OUT`] = OUT || "";
-      }
-    });
-
-    return entry;
-  });
-
-  function isWeekend(dateString) {
-    const date = new Date(dateString);
-    const dayOfWeek = date.getDay();
-    return dayOfWeek === 0 || dayOfWeek === 6; // 0 is Sunday, 6 is Saturday
+    return `${hours} hours, ${minutes} minutes`;
   }
 
-  // console.log(result);
+  // Process the data
+  filteredLines.forEach((entry) => {
+    const [employee_id, timestamp] = entry.split("\t");
+    const [date, time] = timestamp.split(" ");
+    const existingEntry = result.find(
+      (e) => e.employee_id === parseInt(employee_id) && e.date === date
+    );
 
-  // --------------------------------------------------------
+    if (existingEntry) {
+      existingEntry.time_out = time;
+    } else {
+      result.push({
+        employee_id: parseInt(employee_id),
+        name: namesWithId[parseInt(employee_id)] || "Unknown",
+        date: date,
+        time_in: time,
+        status: compareTimes(time),
+        time_out: time,
+      });
+    }
+  });
+
+  // Calculate additional fields
+  result.forEach((entry) => {
+    entry.num_hr = calculateTimeDifference(entry.time_in, entry.time_out);
+    const { diff_of_hrs, differenceInMinutes } = subtractTimes(entry.num_hr);
+    entry.diff_of_hrs = diff_of_hrs;
+    entry.dailyhrs_status =
+      differenceInMinutes < 0
+        ? "late"
+        : differenceInMinutes > 0
+        ? "overtime"
+        : "ontime";
+  });
+
+  // Call the functions to create the table and insert data
+  createAndInsertAttendanceTable(result);
 
   try {
     // Create a worksheet
