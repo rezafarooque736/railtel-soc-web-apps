@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { namesWithId } from "./data";
-import { compareTimes, subtractTimes } from "@/utils";
+import {
+  calculateTimeDifference,
+  checkIfDataExists,
+  compareTimes,
+  subtractTimes,
+} from "@/utils";
 import { createAndInsertAttendanceTable } from "@/lib/mysqldb";
 
 export async function POST(req) {
@@ -22,39 +27,32 @@ export async function POST(req) {
 
   const result = [];
 
-  // Helper function to calculate the difference in hours and minutes
-  function calculateTimeDifference(start, end) {
-    const startTime = new Date(`1970-01-01 ${start}`);
-    const endTime = new Date(`1970-01-01 ${end}`);
-    const diff = endTime - startTime;
-
-    const hours = Math.floor(diff / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
-
-    return `${hours} hours, ${minutes} minutes`;
-  }
-
   // Process the data
-  filteredLines.forEach((entry) => {
+  for (const entry of filteredLines) {
     const [employee_id, timestamp] = entry.split("\t");
     const [date, time] = timestamp.split(" ");
-    const existingEntry = result.find(
-      (e) => e.employee_id === parseInt(employee_id) && e.date === date
-    );
 
-    if (existingEntry) {
-      existingEntry.time_out = time;
-    } else {
-      result.push({
-        employee_id: parseInt(employee_id),
-        name: namesWithId[parseInt(employee_id)] || "Unknown",
-        date: date,
-        time_in: time,
-        status: compareTimes(time),
-        time_out: time,
-      });
+    const doesDataExist = await checkIfDataExists(employee_id, date);
+
+    if (!doesDataExist) {
+      const existingEntry = result.find(
+        (e) => e.employee_id === parseInt(employee_id) && e.date === date
+      );
+
+      if (existingEntry) {
+        existingEntry.time_out = time;
+      } else {
+        result.push({
+          employee_id: parseInt(employee_id),
+          name: namesWithId[parseInt(employee_id)] || "Unknown",
+          date: date,
+          time_in: time,
+          status: compareTimes(time),
+          time_out: time,
+        });
+      }
     }
-  });
+  }
 
   // Calculate additional fields
   result.forEach((entry) => {
@@ -69,7 +67,6 @@ export async function POST(req) {
         : "ontime";
   });
 
-  // Call the functions to create the table and insert data
   createAndInsertAttendanceTable(result);
 
   try {

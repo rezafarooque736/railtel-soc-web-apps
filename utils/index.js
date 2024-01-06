@@ -1,3 +1,5 @@
+import { connection } from "@/lib/mysqldb";
+
 export function subtractTimes(num_hr, time2 = "8 hours 30 minutes") {
   // Parse the input times
   const [hours1, minutes1] = num_hr.match(/\d+/g).map(parseFloat);
@@ -41,4 +43,24 @@ export function compareTimes(time1, time2 = "09:30:00") {
   } else {
     return 0;
   }
+}
+
+// Helper function to calculate the difference in hours and minutes
+export function calculateTimeDifference(start, end) {
+  const startTime = new Date(`1970-01-01 ${start}`);
+  const endTime = new Date(`1970-01-01 ${end}`);
+  const diff = endTime - startTime;
+
+  const hours = Math.floor(diff / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+
+  return `${hours} hours, ${minutes} minutes`;
+}
+
+export async function checkIfDataExists(employeeId, date) {
+  const [rows] = await connection.execute(
+    "SELECT * FROM attendance WHERE employee_id = ? AND date = ?",
+    [employeeId, date]
+  );
+  return rows.length > 0;
 }
