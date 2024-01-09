@@ -1,4 +1,4 @@
-import { connection } from "@/lib/mysqldb";
+import { getDBConnection } from "@/lib/mysqldb";
 
 export function subtractTimes(num_hr, time2 = "8 hours 30 minutes") {
   // Parse the input times
@@ -58,9 +58,15 @@ export function calculateTimeDifference(start, end) {
 }
 
 export async function checkIfDataExists(employeeId, date) {
+  const connection = await getDBConnection();
   const [rows] = await connection.execute(
     "SELECT * FROM attendance WHERE employee_id = ? AND date = ?",
     [employeeId, date]
   );
   return rows.length > 0;
+}
+
+export function formatDate(inputDate) {
+  const [year, month, day] = inputDate.split("-");
+  return `${day}-${month}-${year}`;
 }

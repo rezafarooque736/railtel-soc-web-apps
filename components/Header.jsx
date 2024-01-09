@@ -10,9 +10,8 @@ export default function Header() {
             alt="railtel logo"
             src="/railtel-logo.png"
             width={50}
-            height={75}
+            height={60}
             className="cursor-pointer"
-            priority
           />
         </Link>
         <nav className="flex items-center gap-10 uppercase"></nav>
