@@ -13,12 +13,14 @@ export function SubmitButton({ pendingText, notPendingText }) {
       className="w-full p-2 px-5 py-2 mb-2 mr-2 text-sm font-medium text-center text-white rounded-lg bg-gradient-to-br from-blue-600 to-sky-500 hover:bg-gradient-to-bl focus:outline-none dark:focus:ring-blue-800 disabled:cursor-not-allowed disabled:bg-opacity-70"
     >
       {pending ? (
-        <div className="flex items-center justify-center gap-2">
-          <span>{pendingText}...</span>
+        <div className="flex items-center justify-center gap-4">
+          <span>{pendingText}</span>
           <div className="w-5 h-5 border-b-2 border-white rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="flex items-center gap-1">{notPendingText}</div>
+        <div className="flex items-center justify-center gap-1">
+          {notPendingText}
+        </div>
       )}
     </button>
   );

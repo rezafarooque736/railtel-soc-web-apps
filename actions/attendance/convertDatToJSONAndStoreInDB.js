@@ -3,7 +3,7 @@
 import { namesWithId } from "@/data/data";
 import { createAndInsertAttendanceTable } from "@/lib/mysqldb";
 import {
-  calculateTimeDifference,
+  calculateNumOfHours,
   checkIfDataExists,
   compareTimes,
   formatDate,
@@ -38,34 +38,37 @@ export default async function convertDatToJSONAndStoreInDB(file) {
         if (existingEntry) {
           existingEntry.time_out = time;
         } else {
-          const num_hr = calculateTimeDifference(time, time);
-          const { diff_of_hrs, differenceInMinutes } = subtractTimes(num_hr);
-          const dailyhrs_status =
-            differenceInMinutes < 0
-              ? "late"
-              : differenceInMinutes > 0
-              ? "overtime"
-              : "ontime";
-
           result.push({
             employee_id: parseInt(employee_id),
             name: namesWithId[parseInt(employee_id)] || "Unknown",
-            date: formatDate(date),
+            date: formattedDate,
             time_in: time,
             status: compareTimes(time),
             time_out: time,
-            num_hr,
-            diff_of_hrs,
-            dailyhrs_status,
           });
         }
       }
     }
+
+    // Calculate additional fields
+    result.forEach((entry) => {
+      entry.num_hr = calculateNumOfHours(entry.time_in, entry.time_out);
+      const { diff_of_hrs, differenceInMinutes } = subtractTimes(entry.num_hr);
+      entry.diff_of_hrs = diff_of_hrs;
+      entry.dailyhrs_status =
+        differenceInMinutes < 0
+          ? "late"
+          : differenceInMinutes > 0
+          ? "overtime"
+          : "ontime";
+    });
+
     if (result.length > 0) {
       createAndInsertAttendanceTable(result);
+      return { message: "dat file uploaded successfully to DB" };
     }
 
-    return result;
+    return { message: "There is no new data to upload" };
   } catch (error) {
     console.error("Error reading and parsing dat file:", error);
     return NextResponse.json({ success: false, error: "Invalid dat file" });

@@ -6,7 +6,6 @@ import PaperClipIcon from "@/components/icons/paper-clip";
 import { useFormState } from "react-dom";
 import { SubmitButton } from "../SubmitButton";
 import { createAttendanceAction } from "@/actions/attendance/createAttendanceAction";
-import { downloadInExcelFromJSON } from "../downloadInExcelFromJSON";
 import { useRef } from "react";
 
 export default function AttendanceDatToDocs() {
@@ -24,8 +23,7 @@ export default function AttendanceDatToDocs() {
     initialState
   );
 
-  if (state?.data) {
-    downloadInExcelFromJSON(state.data, state.filename);
+  if (state?.type === "success") {
     formRef.current.reset(); // Reset the form fields
   }
 
@@ -57,12 +55,10 @@ export default function AttendanceDatToDocs() {
             </span>
           )}
           <SubmitButton
-            pendingText="Downloading"
+            pendingText="Uploading"
             notPendingText={
               <>
                 <span>DAT to Docs: </span> <DocumentArrowUpIcon /> Upload
-                <span>&</span>
-                <DocumentArrowDownIcon /> <span>Download</span>
               </>
             }
           />

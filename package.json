@@ -9,10 +9,12 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
+		"luxon": "^3.4.4",
 		"mysql2": "^3.6.5",
 		"next": "14.0.3",
 		"react": "^18",
 		"react-dom": "^18",
+		"xlsx": "^0.18.5",
 		"zod": "^3.22.4"
 	},
 	"devDependencies": {

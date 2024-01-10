@@ -38,13 +38,13 @@ export const createAttendanceAction = async (prevSatate, formData) => {
     }
 
     const { datFileInput } = validatedFile.data;
+
+    // 3. convert dat to json and store in DB
     const res = await convertDatToJSONAndStoreInDB(datFileInput);
 
     return {
       type: "success",
-      message: "dat file uploaded successfully to DB",
-      data: res,
-      filename: datFileInput.name.split(".")[0],
+      res,
     };
   } catch (error) {
     console.log("Database Error occurred", error);
