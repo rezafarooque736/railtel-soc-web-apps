@@ -64,7 +64,7 @@ export default async function convertDatToJSONAndStoreInDB(file) {
     });
 
     if (result.length > 0) {
-      createAndInsertAttendanceTable(result);
+      await createAndInsertAttendanceTable(result);
       return { message: "dat file uploaded successfully to DB" };
     }
 
