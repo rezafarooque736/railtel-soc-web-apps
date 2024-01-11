@@ -9,7 +9,6 @@ This is a portal for all the Small web Apps like
   - add name associated with that id.
   - as well as date, time in, time out, status whether has come before 9:30 AM or not, num of hours he has worked,
   - daily status of ontime overtime or late.
-  - download in excel sheet to use as excel sheet and store in database for backup purpose to be used by another web app.
 
 - CISCO AMP JSON to extract only required data from it and download in excel sheet.generally json file size exeeded 40,000 lines. that's why this is important app to get only required data within second.
 
