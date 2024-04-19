@@ -68,10 +68,12 @@ export const namesWithId = {
   75: "Shubham Jain",
   76: "Satyendra Kushwaha",
   77: "Aarif Muhammad",
+  78: "Shree Ram",
   79: "Amit Mamgain",
   80: "Ravi kumar",
   81: "Abhishek Kumar Mishra",
   82: "Shalini Rathore",
   83: "Jayant Kumar",
-  84: "Shree Ram",
+  84: "Raushan Kumar Jha",
+  85: "Akansha Sharma",
 };
