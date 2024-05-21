@@ -76,4 +76,9 @@ export const namesWithId = {
   83: "Jayant Kumar",
   84: "Raushan Kumar Jha",
   85: "Akansha Sharma",
+  86: "Manjeet",
+  87: "Deepak Tangar",
+  88: "Manish Chahal",
+  89: "Devesh Shukla",
+  90: "Deepak Jha",
 };
