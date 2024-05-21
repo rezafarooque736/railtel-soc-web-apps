@@ -38,7 +38,7 @@ export const namesWithId = {
   45: "Krishna",
   46: "Ishwar",
   47: "Aman",
-  48: "Haidar Zaman",
+  48: "Haider Zaman",
   49: "yash",
   50: "Akshay Tiwari",
   51: "Sandhya Jataw",
