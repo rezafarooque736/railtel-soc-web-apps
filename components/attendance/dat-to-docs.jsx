@@ -1,12 +1,11 @@
 "use client";
 
-import DocumentArrowDownIcon from "@/components/icons/document-arrow-down";
-import DocumentArrowUpIcon from "@/components/icons/document-arrow-up";
 import PaperClipIcon from "@/components/icons/paper-clip";
 import { useFormState } from "react-dom";
 import { SubmitButton } from "../SubmitButton";
 import { createAttendanceAction } from "@/actions/attendance/createAttendanceAction";
 import { useRef } from "react";
+import DocumentArrowUpIcon from "../icons/document-arrow-up";
 
 export default function AttendanceDatToDocs() {
   const formRef = useRef(null); // Create a ref for the form

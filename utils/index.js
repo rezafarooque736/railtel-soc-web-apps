@@ -1,4 +1,5 @@
-import { getDBConnection } from "@/lib/mysqldb";
+import { getMysqlDBConnection } from "@/lib/mysqldb";
+import { getPostgresqlDBConnection } from "@/lib/postgresqldb";
 
 export function subtractTimes(num_hr, time = "8 hours 30 minutes") {
   // Parse the input times
@@ -59,12 +60,28 @@ export function calculateNumOfHours(start, end) {
 }
 
 export async function checkIfDataExists(employeeId, date) {
-  const connection = await getDBConnection();
+  const connection = await getMysqlDBConnection();
   const [rows] = await connection.execute(
     "SELECT * FROM attendance WHERE employee_id = ? AND date = ?",
     [employeeId, date]
   );
   return rows.length > 0;
+}
+
+export async function checkIfDataExistsPostgresqlDB(employeeId, date) {
+  try {
+    const client = await getPostgresqlDBConnection();
+    const query =
+      "SELECT * FROM attendance WHERE employee_id = $1 AND date = $2";
+    const values = [employeeId, date];
+
+    const result = await client.query(query, values);
+
+    return result.rows.length > 0;
+  } catch (error) {
+    console.error("Error checking data existence:", error.message);
+    throw error;
+  }
 }
 
 export function formatDate(inputDate) {
